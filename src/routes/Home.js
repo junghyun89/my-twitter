@@ -1,28 +1,26 @@
+import Tweet from "components/tweet";
 import { db, firestoreInstance } from "dbFirebase";
 import React, { useEffect, useState } from "react";
 
-const Home = () => {
+const Home = ({ userObj }) => {
     const [tweet, setTweet] = useState('');
     const [tweets, setTweets] = useState([]);
     useEffect(() => {
-        getTweets();
-    }, [])
-    const getTweets = async () => {
-        const dbTweets = await firestoreInstance.getDocs(firestoreInstance.collection(db, 'tweets'));
-        dbTweets.forEach((document) => {
-            console.log(document)
-            const tweetObject = {
-                ...document.data(),
-                id: document.id,
-            }
-            setTweets((prev) => [tweetObject, ...prev]);
+        const q = firestoreInstance.query(firestoreInstance.collection(db, 'tweets'));
+        firestoreInstance.onSnapshot(q, (snapshot) => {
+            const array = snapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setTweets(array);
         })
-    }
+    }, [])
     const onSubmit = async (e) => {
         e.preventDefault();
         await firestoreInstance.addDoc(firestoreInstance.collection(db, 'tweets'), {
-            tweet,
+            text: tweet,
             createdAt: Date.now(),
+            creatorId: userObj.uid
         })
         setTweet('');
     }
@@ -38,9 +36,7 @@ const Home = () => {
             </form>
             <div>
                 {tweets.map(tweet => (
-                    <div key={tweet.id}>
-                        <h4>{tweet.tweet}</h4>
-                    </div>
+                    <Tweet key={tweet.id} tweetObj={tweet} isOwner={tweet.creatorId === userObj.uid} />
                 ))}
             </div>
         </div>
