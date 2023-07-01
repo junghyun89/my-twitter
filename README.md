@@ -1,4 +1,4 @@
 ## Stacks
 
 - ReactJS
-- firebase (Auth, Firestore)
+- firebase (Auth, Firestore, Storage)

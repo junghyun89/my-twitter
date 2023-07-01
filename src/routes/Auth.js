@@ -38,8 +38,7 @@ const Auth = () => {
         } else if (name === 'github') {
             provider = new firebaseInstance.GithubAuthProvider();
         }
-        const data = await firebaseInstance.signInWithPopup(authService, provider);
-        console.log(data);
+        await firebaseInstance.signInWithPopup(authService, provider);
     }
 
     return (
