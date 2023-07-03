@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const Home = ({ userObj }) => {
     const [tweet, setTweet] = useState('');
     const [tweets, setTweets] = useState([]);
-    const [attachment, setAttachment] = useState();
+    const [attachment, setAttachment] = useState('');
     const fileInput = useRef();
     useEffect(() => {
         const q = firestoreInstance.query(firestoreInstance.collection(db, 'tweets'), firestoreInstance.orderBy('createdAt', 'desc'));
@@ -20,14 +20,24 @@ const Home = ({ userObj }) => {
     }, [])
     const onSubmit = async (e) => {
         e.preventDefault();
-        const fileRef = storageInstance.ref(storageInstance.getStorage(), `${userObj.uid}/${uuidv4()}`);
-        await storageInstance.uploadString(fileRef, attachment, 'data_url');
-        // await firestoreInstance.addDoc(firestoreInstance.collection(db, 'tweets'), {
-        //     text: tweet,
-        //     createdAt: Date.now(),
-        //     creatorId: userObj.uid
-        // })
-        // setTweet('');
+        let attachmentUrl = '';
+
+        if (attachment !== '') {
+            const attachmentRef = storageInstance.ref(storageInstance.getStorage(), `${userObj.uid}/${uuidv4()}`);
+            await storageInstance.uploadString(attachmentRef, attachment, 'data_url');
+            attachmentUrl = await storageInstance.getDownloadURL(attachmentRef);
+        }
+        
+        const tweetObj = {
+            text: tweet,
+            createdAt: Date.now(),
+            creatorId: userObj.uid,
+            attachmentUrl
+        }
+        await firestoreInstance.addDoc(firestoreInstance.collection(db, 'tweets'), tweetObj)
+        setTweet('');
+        fileInput.current.value = null;
+        setAttachment('');
     }
     const onChange = (e) => {
         const {target : { value }} = e;
@@ -44,7 +54,7 @@ const Home = ({ userObj }) => {
         reader.readAsDataURL(file);
     }
     const onClearAttachment = () => {
-        setAttachment(null);
+        setAttachment('');
         fileInput.current.value = null;
     };
 

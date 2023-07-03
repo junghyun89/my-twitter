@@ -8,12 +8,12 @@ import Profile from "routes/Profile";
 const AppRouter = ({ isLoggedIn, userObj }) => {
     return (
         <Router>
-            {isLoggedIn && <Navigation />}
+            {isLoggedIn && <Navigation userObj={userObj} />}
             <Routes>
                 {isLoggedIn ? (
                     <>
                         <Route element={<Home userObj={userObj} />} exact path="/"></Route>
-                        <Route element={<Profile />} exact path="/profile"></Route>
+                        <Route element={<Profile userObj={userObj} />} exact path="/profile"></Route>
                     </> 
                 ) : (
                     <>

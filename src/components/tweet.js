@@ -1,4 +1,4 @@
-import { db, firestoreInstance } from "dbFirebase";
+import { db, firestoreInstance, storageInstance } from "dbFirebase";
 import React, { useState } from "react";
 
 const Tweet = ({ tweetObj, isOwner }) => {
@@ -7,6 +7,8 @@ const Tweet = ({ tweetObj, isOwner }) => {
     const onDeleteClick = async () => {
         const ok = window.confirm("Are you sure you want to delete this tweet?");
         if (ok) {
+            const urlRef = storageInstance.ref(storageInstance.getStorage(), tweetObj.attachmentUrl);
+            await storageInstance.deleteObject(urlRef);
             await firestoreInstance.deleteDoc(firestoreInstance.doc(db, `tweets/${tweetObj.id}`));
         }
     }
@@ -40,6 +42,7 @@ const Tweet = ({ tweetObj, isOwner }) => {
         ) : (
             <>
                 <h4>{tweetObj.text}</h4>
+                {tweetObj.attachmentUrl && <img src={tweetObj.attachmentUrl} width='50px' height='50px' />}
                 {isOwner && (
                     <>
                         <button onClick={onDeleteClick}>Delete</button>
